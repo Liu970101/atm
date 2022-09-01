@@ -1,0 +1,32 @@
+#! /bin/env bash
+sample=${arg1}
+fastp -i ../"$sample"_1.fq.gz -I ../"$sample"_2.fq.gz -o "$sample"_Clean_1.fastq.gz -O "$sample"_Clean_2.fastq.gz --json "$sample"_fastp.json --html "$sample"_fastp.html --thread 6
+echo "completed"
+
+# Step 1: Prepare data
+sample_name=$1
+fq_dir="../fq/"
+fq1="$fq_dir"/"$sample_name"_Clean_1.fastq.gz 
+fq2="$fq_dir"/"$sample_name"_Clean_2.fastq.gz
+genome_dir="/home/liujun/Index/STAR/genomeDir/"
+gtf="/home/liujun/fly.gtf"
+
+# Step 2: Map reads
+STAR --runThreadN 15 \
+     --genomeDir $genome_dir \
+     --readFilesIn "$sample_name"_2_extracted.fastq.gz \
+     --readFilesCommand zcat \
+     --outFilterMultimapNmax 1 \
+     --outSAMtype BAM SortedByCoordinate \
+     --sjdbGTFfile $gtf \
+     --outFileNamePrefix $sample_name;
+
+     
+# Step 3: Assign reads to genes
+featureCounts -F GTF \
+	      -t exon \
+	      -g gene_name \
+	      -a $gtf \
+              -o "$sample_name"_gene_counts.txt \
+              -R BAM "$sample_name"Aligned.sortedByCoord.out.bam \
+              -T 15;  
