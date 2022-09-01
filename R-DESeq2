@@ -1,0 +1,18 @@
+library(DESeq2)
+mycounts <- read.table("atm.csv", header = T, row.names = 1)
+condition <- factor(c("atm" ,"atm" ,"atm" , "w1118", "w1118","w1118"), levels = c("atm","w1118"))
+condition
+colData <- data.frame(row.names = colnames(mycounts), condition)
+colData
+dds <- DESeqDataSetFromMatrix(mycounts, colData, design = ~condition)
+dds <- DESeq(dds)
+dds
+res = results(dds, contrast=c("condition", "atm", "w1118"))
+res = res[order(res$pvalue),]
+head(res)
+summary(res)
+write.table(res, file="DESeq2_mRNA.csv")
+diff_gene_Group2 <- subset(res, padj < 0.05& abs(log2FoldChange) > 1)
+dim(diff_gene_Group2)
+head(diff_gene_Group2)
+write.table(diff_gene_Group2, file ='DESeq2_mRNA DE.csv')
