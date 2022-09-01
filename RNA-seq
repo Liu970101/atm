@@ -12,15 +12,12 @@ genome_dir="/home/liujun/Index/STAR/genomeDir/"
 gtf="/home/liujun/fly.gtf"
 
 # Step 2: Map reads
-STAR --runThreadN 15 \
+STAR --runThreadN 20 \
      --genomeDir $genome_dir \
-     --readFilesIn "$sample_name"_2_extracted.fastq.gz \
      --readFilesCommand zcat \
-     --outFilterMultimapNmax 1 \
-     --outSAMtype BAM SortedByCoordinate \
-     --sjdbGTFfile $gtf \
-     --outFileNamePrefix $sample_name;
-
+     --readFilesIn $fq1 $fq2    \
+     --outFileNamePrefix ./ $sample_name \
+     --outSAMtype BAM SortedByCoordinate;
      
 # Step 3: Assign reads to genes
 featureCounts -F GTF \
